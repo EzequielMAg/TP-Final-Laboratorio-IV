@@ -12,30 +12,35 @@ export class OrderItemComponent {
 
   @Input()
   public order: Order = new Order();
+  public date: Date | null= null;
+  public formattedDate: string = "";
 
   public panelOpenState: boolean = false;
 
   constructor(private productService: ProductsService) {}
 
-  public formatDate(date: Date | null): string{
-    if(!date){
-      return "Sin fecha"
+  ngOnInit(): void{
+
+    if (typeof this.order.dateTime === 'string') { //como el atributo dateTime se serializa en el json, el mismo se guarda como string
+      this.date = new Date(this.order.dateTime); //por lo que se debe realizar la conversion de string a tipo Date para poder darle el
+    //formato deseado
     }
 
-    const options: Intl.DateTimeFormatOptions = {
-      weekday: "short",
-      day: "numeric",
-      month: "short",
-      hour: "2-digit",
-      minute: "2-digit",
-    };
+    if(this.date == null){
+      this.formattedDate = "sin fecha"
+    }else{
+      this.formattedDate = new Intl.DateTimeFormat('es-ES', {
+        dateStyle: 'full',
+        timeStyle: 'short',
+        timeZone: 'America/Argentina/Buenos_Aires',
+      }).format(this.date);
 
-    return new Intl.DateTimeFormat("es-ES", options).format(date).replace(',', '').concat(" hs");
   }
+}
 
   public getProductById(idProduct : string): Product {
-    return this.productService.getProductById(idProduct)!;
+    // console.log(this.productService.getProductById(idProduct)); 
+    return this.productService.getProductById(idProduct)!; //TODO: optimizar busqueda de productos por id
   }
-
 
 }
